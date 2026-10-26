@@ -1,39 +1,28 @@
-import { useEffect, useRef } from "react";
+import { useState } from "react";
+import { studio } from "./config";
+import { useDiscordStats } from "./hooks";
+import Background from "./components/Background";
+import Console from "./components/Console";
 import Hero from "./components/Hero";
 import Nav from "./components/Nav";
-import { Contact, Footer, Ribbons, Studio, Toolkit, Work, Wrap } from "./components/Sections";
-
-// Small inverted dot that follows the pointer and grows over links.
-function Cursor() {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current!;
-    const onMove = (e: PointerEvent) => {
-      el.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-      el.classList.toggle("big", !!(e.target as Element).closest?.("a, button"));
-    };
-    addEventListener("pointermove", onMove);
-    return () => removeEventListener("pointermove", onMove);
-  }, []);
-  return <div ref={ref} className="cursor" aria-hidden />;
-}
+import { Contact, Footer, Loadout, Missions, Profile, Studio } from "./components/Sections";
 
 export default function App() {
+  const [consoleOpen, setConsoleOpen] = useState(false);
+  const stats = useDiscordStats(studio.discordInvite);
+
   return (
     <>
-      <Cursor />
-      <Nav />
-      <main>
-        <Wrap>
-          <Hero />
-        </Wrap>
-        <Ribbons />
-        <Wrap>
-          <Work />
-          <Studio />
-          <Toolkit />
-          <Contact />
-        </Wrap>
+      <Background />
+      <Console open={consoleOpen} setOpen={setConsoleOpen} />
+      <Nav stats={stats} onConsole={() => setConsoleOpen((o) => !o)} />
+      <main className="mx-auto max-w-6xl px-4 sm:px-6">
+        <Hero />
+        <Profile />
+        <Loadout />
+        <Missions />
+        <Studio stats={stats} />
+        <Contact />
       </main>
       <Footer />
     </>

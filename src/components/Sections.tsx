@@ -1,190 +1,273 @@
-import { type ReactNode } from "react";
-import { links, process, profile, projects, skills, studio } from "../config";
-import { useDiscordStats, useReveal } from "../hooks";
+import { useState, type CSSProperties, type MouseEvent, type ReactNode } from "react";
+import { achievements, links, process, profile, projects, stack, studio, type StackItem } from "../config";
+import { uptime, useReveal, type DiscordStats } from "../hooks";
 import { Logo } from "./Nav";
 
-export const Wrap = ({ children }: { children: ReactNode }) => (
-  <div className="mx-auto max-w-7xl px-4 sm:px-6">{children}</div>
-);
-
-function Section({ id, n, title, children }: { id: string; n: string; title: string; children: ReactNode }) {
+export function Section({ id, n, kicker, title, children }: { id: string; n: number; kicker: string; title: string; children: ReactNode }) {
   const ref = useReveal<HTMLElement>();
   return (
-    <section id={id} ref={ref} className="reveal py-20 sm:py-28">
-      <div className="mb-10 flex items-end justify-between gap-6 border-b-2 border-ink pb-4">
-        <h2 className="wide text-[clamp(2.2rem,6.5vw,5.5rem)] leading-[0.9]">{title}</h2>
-        <span className="label pb-2 text-soft">({n})</span>
+    <section id={id} ref={ref} className="reveal py-20 sm:py-24">
+      <div className="mb-10">
+        <p className="hud-label !text-cyan">
+          [ 0{n} ] {kicker}
+        </p>
+        <h2 className="mt-3 font-display text-3xl font-black tracking-tight sm:text-5xl">{title}</h2>
+        <div className="mt-4 flex gap-1.5">
+          <span className="h-1 w-10 bg-cyan" />
+          <span className="h-1 w-4 bg-violet" />
+          <span className="h-1 w-2 bg-line" />
+        </div>
       </div>
       {children}
     </section>
   );
 }
 
-const Tag = ({ children, dark = false }: { children: ReactNode; dark?: boolean }) => (
-  <span className={`rounded-full border px-3 py-1 text-xs font-medium ${dark ? "border-paper/30" : "border-ink/25"}`}>
-    {children}
-  </span>
+const Tag = ({ children }: { children: ReactNode }) => (
+  <span className="border border-line px-2 py-1 font-mono text-[11px] text-muted">{children}</span>
 );
 
-/* ---------------- ribbons ---------------- */
+/* ---------------- profile: player card ---------------- */
 
-function Tape({ words, className, reverse }: { words: string[]; className: string; reverse?: boolean }) {
-  const text = [...words, ...words, ...words, ...words];
+export function Profile() {
+  const xp = uptime(new Date(profile.devSince), new Date());
+  const progress = Math.round(((xp.m + xp.d / 30) / 12) * 100);
+
   return (
-    <div className={`ribbon absolute inset-x-[-5%] py-3 ${className}`}>
-      <div className={`ribbon-track ${reverse ? "reverse" : ""}`}>
-        {[...text, ...text].map((w, i) => (
-          <span key={i} className="wide flex items-center gap-6 pr-6 text-lg sm:text-2xl">
-            {w} <span className="text-orange">✦</span>
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
+    <Section id="profile" n={1} kicker="player profile" title="Who's playing">
+      <div className="grid gap-5 lg:grid-cols-[300px_1fr]">
+        <div className="hud p-6" style={{ "--cut": "20px" } as CSSProperties}>
+          <div className="hud mx-auto aspect-square w-40 overflow-hidden p-1" style={{ "--edge": "var(--color-cyan)" } as CSSProperties}>
+            <img
+              src={profile.avatar}
+              alt={profile.handle}
+              className="h-full w-full object-cover"
+              style={{ clipPath: "polygon(13px 0,100% 0,100% calc(100% - 13px),calc(100% - 13px) 100%,0 100%,0 13px)" }}
+            />
+          </div>
+          <p className="mt-5 text-center font-display text-2xl font-black">{profile.handle}</p>
+          <p className="mt-1 text-center font-mono text-xs text-muted">{profile.role} · {studio.title}</p>
+          <div className="mt-6">
+            <div className="flex justify-between font-mono text-xs">
+              <span className="text-cyan">LVL {xp.y}</span>
+              <span className="text-muted">{progress}% → LVL {xp.y + 1}</span>
+            </div>
+            <div className="mt-2 h-2 bg-line">
+              <div className="h-full bg-linear-to-r from-cyan to-violet" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-2 font-mono text-xs">
+            <div className="border border-line p-2">
+              <p className="text-muted">CLASS</p>
+              <p className="mt-1">Developer</p>
+            </div>
+            <div className="border border-line p-2">
+              <p className="text-muted">GUILD</p>
+              <p className="mt-1">Parallel</p>
+            </div>
+          </div>
+        </div>
 
-export function Ribbons() {
-  return (
-    <div className="relative mt-6 h-36 overflow-hidden sm:h-44" aria-hidden>
-      <Tape words={["PARALLEL STUDIOS", "FIVEM SCRIPTS", "BUILT PROPERLY"]} className="top-6 -rotate-3 bg-blue text-white" />
-      <Tape words={skills.slice(0, 7).map((s) => s.name.toUpperCase())} className="top-16 rotate-2 bg-ink text-paper sm:top-20" reverse />
-    </div>
-  );
-}
-
-/* ---------------- work ---------------- */
-
-export function Work() {
-  return (
-    <Section id="work" n="01" title="Selected work">
-      <div className="grid gap-6 md:grid-cols-2">
-        {projects.map((p, i) => {
-          const Card = p.url ? "a" : "div";
-          return (
-            <Card
-              key={p.name}
-              {...(p.url ? { href: p.url, target: "_blank", rel: "noreferrer" } : {})}
-              className="group block"
-            >
-              <div
-                className={`relative flex aspect-[16/10] flex-col justify-between overflow-hidden rounded-3xl p-6 transition-transform duration-500 group-hover:-rotate-1 sm:p-8 ${
-                  i % 2 === 0 ? "bg-ink text-paper" : "bg-blue text-white"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="label opacity-70">{p.kind}</span>
-                  <span className="label opacity-70">{String(i + 1).padStart(2, "0")}</span>
+        <div className="flex flex-col gap-5">
+          <div className="hud p-6 sm:p-8">
+            <p className="hud-label">bio</p>
+            <div className="mt-4 space-y-4 text-lg leading-relaxed text-text/85">
+              {profile.about.map((p) => (
+                <p key={p}>{p}</p>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="hud-label mb-3">
+              achievements · {achievements.filter((a) => a.unlocked).length}/{achievements.length}
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {achievements.map((a) => (
+                <div key={a.title} className={`hud flex items-center gap-3 p-4 ${a.unlocked ? "" : "opacity-45"}`} style={{ "--cut": "10px" } as CSSProperties}>
+                  <span
+                    className={`grid h-10 w-10 shrink-0 place-items-center font-mono text-lg ${
+                      a.unlocked ? "bg-cyan/10 text-cyan" : "bg-line text-muted"
+                    }`}
+                  >
+                    {a.unlocked ? "◆" : "?"}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="font-semibold">{a.title}</p>
+                    <p className="truncate text-xs text-muted">{a.unlocked ? a.text : `locked — ${a.text}`}</p>
+                  </div>
                 </div>
-                <p className="wide relative z-10 text-[clamp(1.7rem,3.4vw,3rem)] leading-[0.92] [overflow-wrap:anywhere]">{p.name}</p>
-                <span className="absolute -right-6 -bottom-10 flex gap-3 opacity-15 transition-transform duration-500 group-hover:-translate-x-4">
-                  <span className="h-48 w-10 bg-current" />
-                  <span className="h-48 w-10 bg-current" />
-                </span>
-              </div>
-              <div className="mt-5 flex items-start justify-between gap-6">
-                <p className="max-w-md leading-relaxed text-ink/80">{p.description}</p>
-                {p.url && <span className="arrow text-2xl">↗</span>}
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {p.tags.map((t) => (
-                  <Tag key={t}>{t}</Tag>
-                ))}
-              </div>
-            </Card>
-          );
-        })}
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
-      <a href="https://github.com/Jay5m" target="_blank" rel="noreferrer" className="group mt-12 inline-flex items-center gap-2 font-semibold hover:text-blue">
-        More on GitHub <span className="arrow">↗</span>
-      </a>
     </Section>
   );
 }
 
-/* ---------------- studio ---------------- */
+/* ---------------- loadout ---------------- */
 
-function Stat({ k, v, live }: { k: string; v: string; live?: boolean }) {
+const groups = ["all", "languages", "frontend", "backend", "tooling"] as const;
+
+function Slot({ item, i }: { item: StackItem; i: number }) {
+  const onMove = (e: MouseEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    e.currentTarget.style.setProperty("--ry", `${x * 14}deg`);
+    e.currentTarget.style.setProperty("--rx", `${-y * 14}deg`);
+  };
+  const onLeave = (e: MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.style.setProperty("--ry", "0deg");
+    e.currentTarget.style.setProperty("--rx", "0deg");
+  };
   return (
-    <div className="rounded-2xl border border-paper/15 p-5">
-      <p className="label flex items-center gap-2 text-paper/60">
-        {live && (
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3ddc84] opacity-70" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#3ddc84]" />
-          </span>
-        )}
-        {k}
-      </p>
-      <p className="wide mt-3 text-4xl tabular-nums">{v}</p>
+    <div
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      style={{ "--c": item.color } as CSSProperties}
+      className="hud hud-hover tilt flex items-center gap-4 p-4"
+    >
+      <span
+        className="grid h-12 w-12 shrink-0 place-items-center font-display text-[11px] font-black"
+        style={{ background: `${item.color}1f`, color: item.color, boxShadow: `inset 0 0 0 1px ${item.color}55` }}
+      >
+        {item.mono}
+      </span>
+      <div className="min-w-0">
+        <p className="font-semibold">{item.name}</p>
+        <p className="truncate text-xs text-muted">{item.note}</p>
+      </div>
+      <span className="ml-auto font-mono text-[10px] text-muted">SLOT {String(i + 1).padStart(2, "0")}</span>
     </div>
   );
 }
 
-export function Studio() {
-  const ref = useReveal<HTMLElement>();
-  const stats = useDiscordStats(studio.discordInvite);
-  const fmt = (n?: number) => (n === undefined ? "—" : n.toLocaleString());
-
+export function Loadout() {
+  const [g, setG] = useState<(typeof groups)[number]>("all");
+  const shown = g === "all" ? stack : stack.filter((s) => s.group === g);
   return (
-    <section id="studio" ref={ref} className="reveal py-10">
-      <div className="overflow-hidden rounded-[32px] bg-ink p-6 text-paper sm:p-12">
-        <div className="flex items-center justify-between">
-          <span className="label text-paper/60">(02) The studio</span>
-          <Logo light className="scale-125" />
-        </div>
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1.3fr_1fr]">
-          <div>
-            <h2 className="wide text-[clamp(2.6rem,7vw,6rem)] leading-[0.88]">
-              Parallel
-              <br />
-              <span className="text-blue">Studios</span>
-            </h2>
-            <p className="mt-6 text-xl font-medium">{studio.tagline}</p>
-            <p className="mt-3 max-w-lg leading-relaxed text-paper/70">{studio.blurb}</p>
-            <a href={studio.discordUrl} target="_blank" rel="noreferrer" className="pill group mt-8 border-paper bg-paper text-ink hover:!bg-blue hover:!text-white hover:!border-blue">
-              Join the Discord <span className="arrow">↗</span>
-            </a>
-          </div>
-          <div className="grid grid-cols-2 content-start gap-3">
-            <Stat k="Members" v={fmt(stats?.members)} />
-            <Stat k="Online now" v={fmt(stats?.online)} live />
-            <Stat k="Founder" v={profile.handle} />
-            <Stat k="Focus" v="FiveM" />
-          </div>
-        </div>
-
-        <div className="mt-14 grid gap-px overflow-hidden rounded-2xl bg-paper/15 md:grid-cols-3">
-          {process.map((p) => (
-            <div key={p.step} className="bg-ink p-6">
-              <span className="label text-blue">{p.step}</span>
-              <p className="wide mt-3 text-2xl">{p.title}</p>
-              <p className="mt-3 text-sm leading-relaxed text-paper/65">{p.text}</p>
-            </div>
-          ))}
-        </div>
+    <Section id="loadout" n={2} kicker="equipped" title="Loadout">
+      <div className="mb-6 flex flex-wrap gap-2">
+        {groups.map((x) => {
+          const count = x === "all" ? stack.length : stack.filter((s) => s.group === x).length;
+          return (
+            <button
+              key={x}
+              onClick={() => setG(x)}
+              className={`border px-3 py-1.5 font-mono text-xs uppercase transition-colors ${
+                g === x ? "border-cyan bg-cyan/10 text-cyan" : "border-line text-muted hover:text-text"
+              }`}
+            >
+              {x} <span className="opacity-60">{count}</span>
+            </button>
+          );
+        })}
       </div>
-    </section>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {shown.map((s) => (
+          <Slot key={s.name} item={s} i={stack.indexOf(s)} />
+        ))}
+      </div>
+    </Section>
   );
 }
 
-/* ---------------- toolkit ---------------- */
+/* ---------------- missions ---------------- */
 
-export function Toolkit() {
+const statusColor = { RELEASED: "text-cyan border-cyan/40 bg-cyan/10", LIVE: "text-green border-green/40 bg-green/10", "IN PROGRESS": "text-violet border-violet/40 bg-violet/10" };
+
+export function Missions() {
   return (
-    <Section id="toolkit" n="03" title="Toolkit">
-      <ul>
-        {skills.map((s, i) => (
-          <li
-            key={s.name}
-            className="group grid grid-cols-[2.5rem_1fr] items-center gap-x-4 border-b border-rule px-2 py-4 transition-all duration-300 hover:bg-blue hover:px-5 hover:text-white sm:grid-cols-[3rem_1.2fr_1.5fr_auto]"
-          >
-            <span className="label text-soft group-hover:text-white/70">{String(i + 1).padStart(2, "0")}</span>
-            <span className="wide text-2xl sm:text-4xl">{s.name}</span>
-            <span className="col-start-2 mt-1 text-sm text-ink/70 group-hover:text-white/85 sm:col-start-auto sm:mt-0">{s.note}</span>
-            <span className="label hidden text-soft group-hover:text-white/70 sm:block">{s.group}</span>
-          </li>
+    <Section id="missions" n={3} kicker="completed work" title="Missions">
+      <div className="grid gap-5 md:grid-cols-2">
+        {projects.map((p, i) => (
+          <article key={p.name} className="hud hud-hover group flex flex-col p-6 sm:p-7" style={{ "--cut": "18px" } as CSSProperties}>
+            <div className="flex items-center justify-between gap-4">
+              <span className="font-mono text-xs text-muted">MISSION {String(i + 1).padStart(2, "0")} · {p.kind.toUpperCase()}</span>
+              <span className={`border px-2 py-0.5 font-mono text-[10px] tracking-widest ${statusColor[p.status]}`}>{p.status}</span>
+            </div>
+            <h3 className="mt-4 font-display text-2xl font-black group-hover:text-cyan">{p.name}</h3>
+            <p className="mt-3 flex-1 leading-relaxed text-text/75">{p.description}</p>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              {p.tags.map((t) => (
+                <Tag key={t}>{t}</Tag>
+              ))}
+              {p.url && (
+                <a href={p.url} target="_blank" rel="noreferrer" className="ml-auto font-mono text-sm text-cyan hover:underline">
+                  view source ↗
+                </a>
+              )}
+            </div>
+          </article>
         ))}
-      </ul>
+        <div className="flex min-h-48 flex-col items-center justify-center border border-dashed border-line p-6 text-center md:col-span-2">
+          <p className="font-mono text-sm text-muted">
+            <span className="text-violet">&gt;</span> next mission loading
+            <span className="caret" />
+          </p>
+          <a href="https://github.com/Jay5m" target="_blank" rel="noreferrer" className="mt-3 font-mono text-xs text-cyan hover:underline">
+            more on github ↗
+          </a>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/* ---------------- studio: server listing ---------------- */
+
+export function Studio({ stats }: { stats: DiscordStats }) {
+  const fill = stats ? Math.max(4, Math.round((stats.online / stats.members) * 100)) : 0;
+  return (
+    <Section id="studio" n={4} kicker="server browser" title="Parallel Studios">
+      <div className="hud overflow-hidden" style={{ "--cut": "20px" } as CSSProperties}>
+        <div className="hidden grid-cols-[1fr_200px_140px] gap-6 border-b border-line px-6 py-3 font-mono text-[11px] tracking-widest text-muted md:grid">
+          <span>SERVER</span>
+          <span>PLAYERS</span>
+          <span className="text-right">ACTION</span>
+        </div>
+        <div className="grid items-center gap-6 px-6 py-6 md:grid-cols-[1fr_200px_140px]">
+          <div className="flex items-center gap-4">
+            <span className="grid h-14 w-14 shrink-0 place-items-center border border-line bg-ink">
+              <Logo className="scale-150" />
+            </span>
+            <div>
+              <p className="flex items-center gap-2 font-display text-xl font-black">
+                {studio.name}
+                <span className="border border-cyan/40 bg-cyan/10 px-1.5 py-0.5 font-mono text-[9px] tracking-widest text-cyan">OWNER</span>
+              </p>
+              <p className="mt-1 text-sm text-muted">
+                {studio.tagline} {studio.blurb}
+              </p>
+            </div>
+          </div>
+          <div className="font-mono text-sm">
+            <p>
+              <span className="text-green">{stats ? stats.online.toLocaleString() : "—"}</span>
+              <span className="text-muted"> / {stats ? stats.members.toLocaleString() : "—"}</span>
+            </p>
+            <div className="mt-2 h-1.5 bg-line">
+              <div className="h-full bg-green transition-[width] duration-700" style={{ width: `${fill}%` }} />
+            </div>
+            <p className="mt-1.5 text-[10px] text-muted">online / members · live</p>
+          </div>
+          <a href={studio.discordUrl} target="_blank" rel="noreferrer" className="hud btn btn-primary justify-center md:justify-self-end">
+            connect
+          </a>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-5 md:grid-cols-3">
+        {process.map((p, i) => (
+          <div key={p.step} className="hud relative p-6" style={{ "--cut": "12px" } as CSSProperties}>
+            <span className="font-mono text-xs text-violet">STEP {p.step}</span>
+            <p className="mt-2 font-display text-xl font-black">{p.title}</p>
+            <p className="mt-2 text-sm leading-relaxed text-muted">{p.text}</p>
+            {i < process.length - 1 && <span className="absolute top-1/2 -right-4 hidden font-mono text-cyan md:block">›</span>}
+          </div>
+        ))}
+      </div>
     </Section>
   );
 }
@@ -193,26 +276,34 @@ export function Toolkit() {
 
 export function Contact() {
   return (
-    <Section id="contact" n="04" title="Say hello">
-      <p className="wide max-w-5xl text-[clamp(2.4rem,7.5vw,7rem)] leading-[0.9]">
-        Need a script? <span className="text-blue">Let's build it.</span>
-      </p>
-      <div className="mt-14">
-        {links.map((l) => (
-          <a
-            key={l.label}
-            href={l.href}
-            target="_blank"
-            rel="noreferrer"
-            className="group flex items-center justify-between gap-4 border-t border-ink py-6 last:border-b hover:text-blue"
-          >
-            <span className="wide text-3xl sm:text-5xl">{l.label}</span>
-            <span className="flex items-center gap-4">
-              <span className="hidden text-ink/60 group-hover:text-blue sm:inline">{l.handle}</span>
-              <span className="arrow text-3xl sm:text-4xl">↗</span>
-            </span>
-          </a>
-        ))}
+    <Section id="contact" n={5} kicker="join the lobby" title="Contact">
+      <div className="hud p-6 sm:p-10" style={{ "--cut": "24px" } as CSSProperties}>
+        <p className="font-display text-3xl leading-tight font-black tracking-tight sm:text-5xl">
+          need a script? let's build something{" "}
+          <span className="split text-cyan" data-text="parallel">
+            parallel
+          </span>
+          .
+        </p>
+        <p className="mt-4 max-w-xl text-muted">The Discord is the fastest way to reach me — open a ticket or just say hi.</p>
+        <div className="mt-8 grid gap-3 sm:grid-cols-3">
+          {links.map((l) => (
+            <a
+              key={l.label}
+              href={l.href}
+              target="_blank"
+              rel="noreferrer"
+              className="hud hud-hover group flex items-center justify-between p-4"
+              style={{ "--cut": "10px" } as CSSProperties}
+            >
+              <span>
+                <span className="hud-label block">{l.label}</span>
+                <span className="mt-1 block group-hover:text-cyan">{l.handle}</span>
+              </span>
+              <span className="text-muted group-hover:text-cyan">↗</span>
+            </a>
+          ))}
+        </div>
       </div>
     </Section>
   );
@@ -220,17 +311,15 @@ export function Contact() {
 
 export function Footer() {
   return (
-    <footer className="border-t border-rule">
-      <Wrap>
-        <div className="flex flex-col gap-3 py-8 text-sm text-soft sm:flex-row sm:items-center sm:justify-between">
-          <span className="flex items-center gap-3">
-            <Logo /> © {new Date().getFullYear()} {profile.handle} · {studio.name}
-          </span>
-          <a href="#top" className="font-medium text-ink hover:text-blue">
-            Back to top ↑
-          </a>
-        </div>
-      </Wrap>
+    <footer className="border-t border-line/70">
+      <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 font-mono text-xs text-muted sm:flex-row sm:justify-between sm:px-6">
+        <span className="flex items-center gap-2">
+          <Logo /> © {new Date().getFullYear()} {profile.handle} · {studio.name}
+        </span>
+        <span>
+          press <kbd className="rounded border border-line px-1.5 py-0.5 text-text">F8</kbd> for the console
+        </span>
+      </div>
     </footer>
   );
 }

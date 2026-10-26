@@ -1,5 +1,53 @@
 import { useEffect, useRef, useState } from "react";
 
+export function uptime(since: Date, now: Date) {
+  let y = now.getFullYear() - since.getFullYear();
+  let m = now.getMonth() - since.getMonth();
+  let d = now.getDate() - since.getDate();
+  if (d < 0) {
+    m--;
+    d += new Date(now.getFullYear(), now.getMonth(), 0).getDate();
+  }
+  if (m < 0) {
+    y--;
+    m += 12;
+  }
+  return { y, m, d };
+}
+
+export function useTyped(phrases: string[], speed = 55, pause = 1700) {
+  const [text, setText] = useState("");
+  useEffect(() => {
+    let i = 0;
+    let j = 0;
+    let deleting = false;
+    let t = 0;
+    const tick = () => {
+      const p = phrases[i];
+      if (!deleting) {
+        j++;
+        setText(p.slice(0, j));
+        if (j === p.length) {
+          deleting = true;
+          t = window.setTimeout(tick, pause);
+          return;
+        }
+      } else {
+        j--;
+        setText(p.slice(0, j));
+        if (j === 0) {
+          deleting = false;
+          i = (i + 1) % phrases.length;
+        }
+      }
+      t = window.setTimeout(tick, deleting ? speed / 2 : speed);
+    };
+    t = window.setTimeout(tick, 500);
+    return () => clearTimeout(t);
+  }, [phrases, speed, pause]);
+  return text;
+}
+
 export function useReveal<T extends HTMLElement>() {
   const ref = useRef<T>(null);
   useEffect(() => {

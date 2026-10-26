@@ -1,164 +1,224 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Archivo", system-ui, sans-serif;
-  --font-sans: "Instrument Sans", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --color-paper: #f1eee7;
-  --color-ink: #0d0d0d;
-  --color-blue: #2a35ff;
-  --color-orange: #ff5b1f;
-  --color-soft: #6d6a62;
-  --color-rule: rgb(13 13 13 / 0.14);
+  --font-display: "Unbounded", system-ui, sans-serif;
+  --font-sans: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --color-ink: #07070b;
+  --color-panel: #0d0d15;
+  --color-line: #1d1d2b;
+  --color-text: #e8e8f2;
+  --color-muted: #7c7c95;
+  --color-cyan: #5ef2ff;
+  --color-violet: #a98bff;
+  --color-green: #6cf08a;
 }
 
 html {
   scroll-behavior: smooth;
-  background: var(--color-paper);
+  background: var(--color-ink);
 }
+/* body stays transparent so the fixed -z-10 background canvas shows through */
 body {
-  color: var(--color-ink);
+  color: var(--color-text);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 ::selection {
-  background: var(--color-blue);
-  color: var(--color-paper);
+  background: var(--color-violet);
+  color: var(--color-ink);
 }
 section[id] {
-  scroll-margin-top: 72px;
+  scroll-margin-top: 80px;
 }
 
-/* paper grain */
+/* faint CRT scanlines over everything */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 70;
-  opacity: 0.35;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .18 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  z-index: 60;
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 3px);
 }
 
-/* extra-wide display type */
-.wide {
-  font-family: var(--font-display);
-  font-stretch: 125%;
-  font-weight: 900;
-  letter-spacing: -0.03em;
-}
-.label {
+@layer components {
+.hud-label {
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
+  color: var(--color-muted);
 }
 
-/* hero letters stretch on hover */
-.letter {
-  display: inline-block;
-  transform-origin: bottom;
-  transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.2, 1.3), color 0.2s;
+/* ---------- chamfered HUD panels ----------
+   The element itself is the 1px edge colour; ::before paints the fill
+   inset by 1px with the same cut corners. */
+.hud {
+  --cut: 14px;
+  --edge: var(--color-line);
+  --fill: color-mix(in oklab, var(--color-panel) 88%, transparent);
+  position: relative;
+  isolation: isolate;
+  background: var(--edge);
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+  transition: background 0.2s;
 }
-.letter:hover {
-  transform: scaleY(1.18) translateY(-2%);
-  color: var(--color-blue);
+.hud::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  background: var(--fill);
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
 }
-
-/* spinning badge */
-.spin {
-  animation: spin 18s linear infinite;
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* tilted tape ribbons */
-.ribbon {
-  overflow: hidden;
-  white-space: nowrap;
-}
-.ribbon-track {
-  display: flex;
-  width: max-content;
-  animation: marquee 30s linear infinite;
-}
-.ribbon-track.reverse {
-  animation-direction: reverse;
-}
-@keyframes marquee {
-  to { transform: translateX(-50%); }
+.hud-hover:hover {
+  --edge: var(--c, var(--color-cyan));
 }
 
-.pill {
+.btn {
+  --cut: 10px;
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.85rem 1.4rem;
-  border-radius: 999px;
-  border: 1.5px solid var(--color-ink);
-  font-weight: 600;
-  transition: background 0.2s, color 0.2s, transform 0.2s;
+  gap: 0.5rem;
+  padding: 0.8rem 1.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 0.2s, background 0.2s;
 }
-.pill:hover {
-  background: var(--color-ink);
-  color: var(--color-paper);
-  transform: translateY(-2px);
+.btn:hover {
+  --edge: var(--color-cyan);
+  color: var(--color-cyan);
 }
-.pill-blue {
-  background: var(--color-blue);
-  border-color: var(--color-blue);
-  color: white;
+.btn-primary {
+  background: var(--color-cyan);
+  color: var(--color-ink);
+  font-weight: 700;
 }
-.pill-blue:hover {
-  background: var(--color-ink);
-  border-color: var(--color-ink);
+.btn-primary::before {
+  display: none;
+}
+.btn-primary:hover {
+  background: var(--color-text);
+  color: var(--color-ink);
 }
 
-/* arrows that rotate on hover */
-.arrow {
-  display: inline-block;
-  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1.3);
+/* viewfinder corners */
+.corner {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  border-color: var(--color-cyan);
+  opacity: 0.8;
 }
-.group:hover .arrow {
-  transform: rotate(45deg);
+.corner.tl { top: 0; left: 0; border-top: 2px solid; border-left: 2px solid; }
+.corner.tr { top: 0; right: 0; border-top: 2px solid; border-right: 2px solid; }
+.corner.bl { bottom: 0; left: 0; border-bottom: 2px solid; border-left: 2px solid; border-color: var(--color-violet); }
+.corner.br { bottom: 0; right: 0; border-bottom: 2px solid; border-right: 2px solid; border-color: var(--color-violet); }
+
+.scan {
+  position: absolute;
+  inset-inline: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-cyan), transparent);
+  opacity: 0.35;
+  animation: scan 6s ease-in-out infinite;
+}
+@keyframes scan {
+  0%, 100% { top: 0%; }
+  50% { top: 100%; }
+}
+
+/* ---------- chromatic "parallel" split text ---------- */
+.split {
+  --s: 3px;
+  position: relative;
+  display: inline-block;
+}
+.split::before,
+.split::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.split::before {
+  color: var(--color-cyan);
+  transform: translateX(calc(var(--s) * -1));
+  animation: glitch 5s infinite steps(1);
+}
+.split::after {
+  color: var(--color-violet);
+  transform: translateX(var(--s));
+}
+.split:hover {
+  --s: 10px;
+}
+.parallel-mode .split {
+  --s: 14px;
+}
+.parallel-mode canvas {
+  filter: hue-rotate(120deg) saturate(1.6);
+}
+@keyframes glitch {
+  0%, 90%, 100% { clip-path: inset(0 0 0 0); }
+  92% { clip-path: inset(18% 0 58% 0); transform: translateX(-14px); }
+  94% { clip-path: inset(62% 0 8% 0); transform: translateX(10px); }
+  96% { clip-path: inset(38% 0 42% 0); transform: translateX(-6px); }
+}
+
+.caret {
+  display: inline-block;
+  width: 0.6ch;
+  height: 1.1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--color-cyan);
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
 }
 
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: translateY(18px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .reveal.in {
   opacity: 1;
   transform: none;
 }
 
-/* cursor dot */
-.cursor {
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: 80;
-  width: 14px;
-  height: 14px;
-  margin: -7px 0 0 -7px;
-  border-radius: 999px;
-  background: white;
-  mix-blend-mode: difference;
-  pointer-events: none;
-  transition: width 0.25s, height 0.25s, margin 0.25s;
+.marquee {
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
 }
-.cursor.big {
-  width: 56px;
-  height: 56px;
-  margin: -28px 0 0 -28px;
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 38s linear infinite;
 }
-@media (pointer: coarse) {
-  .cursor { display: none; }
+.marquee-track.reverse {
+  animation-direction: reverse;
 }
+@keyframes marquee {
+  to { transform: translateX(-50%); }
+}
+
+.tilt {
+  transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.15s ease-out, background 0.2s;
+}
+
+}
+
+.term-scroll::-webkit-scrollbar { width: 6px; }
+.term-scroll::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

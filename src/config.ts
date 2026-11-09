@@ -1,5 +1,10 @@
 // Everything personal lives here — edit this file to update the site.
 
+export const site = {
+  // true = everyone sees the "Undergoing Updates" page
+  maintenance: true,
+};
+
 export const profile = {
   handle: "Jay5m",
   role: "Software Engineer",

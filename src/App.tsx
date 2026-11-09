@@ -47,17 +47,16 @@ export default function App() {
       <AnimatePresence>{intro && <Intro onDone={endIntro} />}</AnimatePresence>
       <TopBar stats={stats} views={views} latest={entries[0] && `${entries[0].title} — ${entries[0].version}`} />
       <Nav path={path} onPalette={() => setPalette(true)} />
-      <AnimatePresence mode="wait">
-        <motion.main
-          key={path}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
-        >
-          {page}
-        </motion.main>
-      </AnimatePresence>
+      {/* Swap pages immediately and fade the new one in — waiting on an exit
+          animation could leave the old page stuck on screen. */}
+      <motion.main
+        key={path}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+      >
+        {page}
+      </motion.main>
       <Footer views={views} stats={stats} />
       <CommandPalette open={palette} setOpen={setPalette} />
     </>

@@ -47,6 +47,14 @@ export const developers: Developer[] = [
       { label: "YouTube", href: "https://www.youtube.com/@realjay5m" },
     ],
   },
+  {
+    name: "xyz",
+    role: "Developer",
+    avatar: "https://cdn.discordapp.com/avatars/1310029565598502954/335ed7a46c0f8ad730bdbee032c71e90.webp?size=256",
+    bio: "Builds Parallel scripts in Lua and the interfaces around them in React and TypeScript.",
+    skills: ["Lua", "React", "TypeScript"],
+    links: [{ label: "Discord", href: "https://discord.com/users/1310029565598502954" }],
+  },
 ];
 
 export type Script = {

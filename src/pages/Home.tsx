@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import AnnouncementDemo from "../components/AnnouncementDemo";
 import { Button, Reveal, SectionHead, StatusPill, Tag } from "../components/ui";
 import { developers, offerings, process, scripts, studio, type ChangelogEntry } from "../config";
 import { changeKinds, useCountUp, type DiscordStats } from "../lib/data";
@@ -27,13 +26,13 @@ export default function Home({ stats, views, entries }: { stats: DiscordStats; v
   return (
     <>
       {/* hero */}
-      <section className="container-x grid items-center gap-14 pt-14 pb-20 sm:pt-20 lg:grid-cols-[1fr_1.1fr] lg:gap-16 lg:pt-24">
+      <section className="container-x pt-16 pb-20 sm:pt-24 lg:pt-32">
         <div>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} className="label flex items-center gap-3">
             <span className="h-px w-8 bg-red" />
             FiveM script studio · Est. {studio.founded}
           </motion.p>
-          <h1 className="mt-7 text-[clamp(2.6rem,5.6vw,4.6rem)] leading-[1.02] font-extrabold tracking-[-0.035em]">
+          <h1 className="mt-7 max-w-5xl text-[clamp(2.8rem,8vw,7rem)] leading-[0.98] font-extrabold tracking-[-0.04em]">
             {words.map((w, i) => (
               <span key={i} className="inline-block overflow-hidden pb-[0.08em] align-bottom">
                 <motion.span
@@ -51,7 +50,7 @@ export default function Home({ stats, views, entries }: { stats: DiscordStats; v
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.55, ease }}
-            className="mt-6 max-w-lg text-lg leading-relaxed text-muted"
+            className="mt-8 max-w-xl text-lg leading-relaxed text-muted sm:text-xl"
           >
             {studio.intro}
           </motion.p>
@@ -67,9 +66,6 @@ export default function Home({ stats, views, entries }: { stats: DiscordStats; v
             </Button>
           </motion.div>
         </div>
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3, ease }}>
-          <AnnouncementDemo />
-        </motion.div>
       </section>
 
       {/* live numbers */}

@@ -3,7 +3,7 @@
 export const site = {
   // true = everyone sees the "Undergoing Updates" page.
   // Add ?preview to the address to see the real site anyway.
-  maintenance: true,
+  maintenance: false,
 };
 
 export const studio = {

@@ -1,103 +1,130 @@
-// Everything personal lives here — edit this file to update the site.
+// All of the site's text and data lives here. Edit this file to update the site.
 
 export const site = {
-  // true = everyone sees the "Undergoing Updates" page
+  // true = everyone sees the "Undergoing Updates" page.
+  // Add ?preview to the address to see the real site anyway.
   maintenance: true,
 };
 
-export const profile = {
-  handle: "Jay5m",
-  role: "Software Engineer",
-  study: "Software Engineering Student",
-  // Roughly when you started coding — drives the level + XP bar.
-  devSince: "2023-10-01",
-  avatar: "https://avatars.githubusercontent.com/u/281129695?v=4",
-  about: [
-    "I'm Jay5m — a software engineering student who's been writing code for three years.",
-    "I own and run Parallel Studios, where I build FiveM scripts and the interfaces around them: Lua for the game logic, React and TypeScript for the UI.",
-  ],
-  taglines: [
-    "software engineer.",
-    "founder @ parallel studios.",
-    "fivem developer. lua main.",
-    "student, shipping anyway.",
-  ],
-};
-
-export const achievements = [
-  { title: "Founder", text: "Started Parallel Studios", unlocked: true },
-  { title: "3-Year Streak", text: "Coding since 2023", unlocked: true },
-  { title: "Shipped It", text: "Released Parallel Announcements", unlocked: true },
-  { title: "Student Dev", text: "Studying while building", unlocked: true },
-  { title: "Sleep Schedule", text: "Fix it. Someday.", unlocked: false },
-];
-
 export const studio = {
   name: "Parallel Studios",
-  title: "Owner & Developer",
-  tagline: "Script development for FiveM.",
-  blurb: "High-quality FiveM scripts at fair prices, from developers who stay active after launch.",
+  founded: "2025",
+  headline: "FiveM scripts that look as good as they run.",
+  intro:
+    "We build resources and interfaces for FiveM servers — designed in Figma, written in Lua and React, and supported directly in our Discord.",
   discordInvite: "pstudios",
   discordUrl: "https://discord.gg/pstudios",
+  // Point this at your ticket channel if you have one,
+  // e.g. https://discord.com/channels/<server-id>/<channel-id>
+  ticketUrl: "https://discord.gg/pstudios",
+  github: "https://github.com/Jay5m",
+  youtube: "https://www.youtube.com/@realjay5m",
+  // Changelog posts are read live from GitHub Releases on this repo.
+  changelogRepo: "Jay5m/parallelstudios-site",
 };
 
-export const process = [
-  { step: "01", title: "Design", text: "UI laid out in Figma first, so it feels right before any code exists." },
-  { step: "02", title: "Build", text: "Lua for game logic, React + TypeScript for NUI — optimised to keep servers smooth." },
-  { step: "03", title: "Ship", text: "Release, support, update. Issues get fixed fast through the Discord." },
+export type Link = { label: string; href: string };
+
+export type Developer = {
+  name: string;
+  role: string;
+  bio: string;
+  avatar?: string;
+  skills: string[];
+  links: Link[];
+};
+
+// Add a developer by copying a block below.
+export const developers: Developer[] = [
+  {
+    name: "Jay5m",
+    role: "Founder & Lead Developer",
+    avatar: "https://avatars.githubusercontent.com/u/281129695?v=4",
+    bio: "Runs Parallel Studios and writes most of the code — Lua for game logic, React and TypeScript for interfaces, and Figma before either.",
+    skills: ["Lua", "React", "TypeScript", "Node.js", "Figma"],
+    links: [
+      { label: "GitHub", href: "https://github.com/Jay5m" },
+      { label: "YouTube", href: "https://www.youtube.com/@realjay5m" },
+    ],
+  },
 ];
 
-export type Project = {
+export type Script = {
   name: string;
-  kind: string;
-  status: "RELEASED" | "LIVE" | "IN PROGRESS";
+  status: "Released" | "In development";
+  summary: string;
   description: string;
   tags: string[];
-  url?: string;
+  features: string[];
+  links: Link[];
 };
 
-// Add your projects here — they show up as missions automatically.
-export const projects: Project[] = [
+export const scripts: Script[] = [
   {
     name: "Parallel Announcements",
-    kind: "FiveM script",
-    status: "RELEASED",
-    description: "A NoPixel V-inspired replacement for txAdmin's announcements — cleaner, better-looking server-wide messages.",
-    tags: ["Lua", "FiveM", "NUI"],
-    url: "https://github.com/Jay5m/Parallel-Announcements",
+    status: "Released",
+    summary: "A cleaner replacement for txAdmin's announcement and restart pop-ups.",
+    description:
+      "Swaps txAdmin's default Server Announcement and Scheduled Restart notifications for custom NUI cards built in React and TypeScript. Restart warnings count down live, and in the final minute the card stays on screen — even for players who join late.",
+    tags: ["Lua", "React", "TypeScript", "txAdmin"],
+    features: [
+      "Announcement card with the admin's message",
+      "Restart card with a live countdown",
+      "Sticky final-minute countdown (configurable)",
+      "Hides itself when a restart is skipped",
+      "Designed at 1920×1080, scales to any resolution",
+      "Test commands: /txnotify_announce and /txnotify_restart",
+    ],
+    links: [{ label: "Source on GitHub", href: "https://github.com/Jay5m/Parallel-Announcements" }],
   },
+];
+
+export const offerings = [
+  { title: "Scripts", text: "Game logic in Lua, written to stay light on the server and simple to configure." },
+  { title: "Interfaces", text: "NUI built in React and TypeScript, designed in Figma at 1920×1080 and scaled to every resolution." },
+  { title: "Custom work", text: "Need something specific for your server? Open a commission ticket and we'll scope it with you." },
+];
+
+export const process = [
+  { title: "Design", text: "Every interface starts as a Figma layout, so it looks right before a line of code exists." },
+  { title: "Build", text: "Lua for the game side, React and TypeScript for NUI, kept lean so servers stay smooth." },
+  { title: "Ship & support", text: "Released with install docs, then maintained — fixes land in the changelog and Discord." },
+];
+
+export type TicketType = { title: string; text: string; icon: "cart" | "wrench" | "bug" | "pen" | "handshake" };
+
+export const ticketTypes: TicketType[] = [
+  { title: "Purchase help", text: "Questions before or after buying a script.", icon: "cart" },
+  { title: "Script support", text: "Install problems, errors, or something not behaving as expected.", icon: "wrench" },
+  { title: "Bug report", text: "Found a bug? Tell us how to reproduce it and we'll fix it.", icon: "bug" },
+  { title: "Custom commission", text: "A script or interface built specifically for your server.", icon: "pen" },
+  { title: "Partnerships & other", text: "Collabs, partnerships, or anything that doesn't fit above.", icon: "handshake" },
+];
+
+export const faq = [
+  { q: "How do I buy a script?", a: "Join our Discord and open a Purchase help ticket — we'll walk you through it." },
   {
-    name: "jay5m portfolio",
-    kind: "Website",
-    status: "LIVE",
-    description: "This site. HUD layout, live Discord stats, and an F8 console — press F8 and type 'help'.",
-    tags: ["React", "TypeScript", "Tailwind CSS", "Vite"],
+    q: "Where do I get support?",
+    a: "Open a Script support ticket in Discord. Include the script name, your framework, and any errors from the server console.",
   },
+  { q: "Do scripts get updates?", a: "Yes. Fixes and improvements are posted on the Changelog page and announced in Discord." },
+  { q: "Can you build something custom?", a: "Yes. Open a Custom commission ticket describing what you need and we'll get back to you." },
 ];
 
-export type StackItem = {
-  name: string;
-  mono: string;
-  color: string;
-  group: "languages" | "frontend" | "backend" | "tooling";
-  note: string;
-};
+export type ChangelogEntry = { date: string; version: string; title: string; body: string; url?: string };
 
-export const stack: StackItem[] = [
-  { name: "Lua", mono: "LUA", color: "#7b8cff", group: "languages", note: "main — FiveM resources" },
-  { name: "TypeScript", mono: "TS", color: "#4b8fe3", group: "languages", note: "types everywhere" },
-  { name: "JavaScript", mono: "JS", color: "#f7df1e", group: "languages", note: "where it all started" },
-  { name: "Python", mono: "PY", color: "#ffd343", group: "languages", note: "scripts & automation" },
-  { name: "React", mono: "RE", color: "#61dafb", group: "frontend", note: "NUI menus & sites" },
-  { name: "Tailwind CSS", mono: "TW", color: "#38bdf8", group: "frontend", note: "styling at speed" },
-  { name: "CSS", mono: "CSS", color: "#b07cff", group: "frontend", note: "the fundamentals" },
-  { name: "Node.js", mono: "NODE", color: "#6cc24a", group: "backend", note: "APIs & Discord bots" },
-  { name: "Vite", mono: "VITE", color: "#c264fe", group: "tooling", note: "NUI builds & dev server" },
-  { name: "Figma", mono: "FIG", color: "#ff7262", group: "tooling", note: "UI design first" },
-];
-
-export const links = [
-  { label: "Discord", handle: "discord.gg/pstudios", href: "https://discord.gg/pstudios" },
-  { label: "GitHub", handle: "github.com/Jay5m", href: "https://github.com/Jay5m" },
-  { label: "YouTube", handle: "@realjay5m", href: "https://www.youtube.com/@realjay5m" },
+// Built-in entries. Anything you publish as a GitHub Release on `changelogRepo`
+// is added automatically, newest first.
+export const changelog: ChangelogEntry[] = [
+  {
+    date: "2026-11-08",
+    version: "Site 2.0",
+    title: "New website",
+    body: `### New
+- Rebuilt the Parallel Studios website from scratch
+- Team page with everyone currently developing at Parallel
+- Changelog page — every update to our scripts lands here
+- Make a ticket page that takes you straight to the right place in Discord
+- Live Discord member count and site views in the top bar`,
+  },
 ];
